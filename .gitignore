@@ -60,4 +60,5 @@ typings/
 # next.js build output
 .next
 
-ibm-watson.credentials.json
+./ibm-watson-credentials.json
+ibm-watson-credentials.json
