@@ -1,9 +1,12 @@
 var fs = require('fs');
+var wav = require('wav');
+var Speaker = require('speaker');
 var watson = require('watson-developer-cloud');
 var CREDENTIALS = JSON.parse(fs.readFileSync('ibm-watson-credentials.json'));
 //var VisualRecognitionV3 = new watson.VisualRecognitionV3(CREDENTIALS.VisualRecognitionV3);
 //var ToneAnalyzerV3 = new watson.ToneAnalyzerV3(CREDENTIALS.ToneAnalyzerV3);
 var LanguageTranslatorV3 = new watson.LanguageTranslatorV3(CREDENTIALS.LanguageTranslatorV3);
+var TextToSpeechV1 = new watson.TextToSpeechV1(CREDENTIALS.TextToSpeechV1);
 
 /**
  * Testing the image analizer.
@@ -78,9 +81,48 @@ LanguageTranslatorV3.translate(
         if (error)
             console.log(error)
         else
-            console.log(JSON.stringify(response, null, 2));
+            var new_text = response.translations[0].translation;
+            console.log(new_text);
+            var synthesizeParams = {
+                text: new_text,
+                accept: 'audio/wav',
+                voice: 'es-LA_SofiaVoice'
+            };
+            
+            var reader = new wav.Reader();
+            // Pipe the synthesized text to a file.
+            TextToSpeechV1.synthesize(synthesizeParams).on('error', function(error) {
+                console.log(error);
+            }).pipe(reader)
+                .on('format', function(format) {
+                    console.log('Vamos a Hablar:')
+                    reader.pipe(new Speaker(format));
+                });
     }
 );
 /**
- * Testing the lenguage traslator
+ * END: Testing the lenguage traslator
+ */
+
+
+/**
+ * Testing the text to speech.
+ */
+// var synthesizeParams = {
+//     text: text,
+//     accept: 'audio/wav',
+//     voice: 'en-US_AllisonVoice'
+// };
+
+// var reader = new wav.Reader();
+// // Pipe the synthesized text to a file.
+// TextToSpeechV1.synthesize(synthesizeParams).on('error', function(error) {
+//     console.log(error);
+// }).pipe(reader)
+//     .on('format', function(format) {
+//         console.log('Lets Talk:')
+//         reader.pipe(new Speaker(format));
+//     });
+/**
+ * END: Testing the text to speech.
  */
